@@ -5,13 +5,13 @@ set -ex
 PROJECT_NAME="rtl_433"
 FED_RELEASE=29
 
-basecontainer_name="${PROJECT_NAME}_fedora${FED_RELEASE}_base"
+basecontainer_name="fedora${FED_RELEASE}_base"
 buildcontainer_name="${PROJECT_NAME}_fedora${FED_RELEASE}_build"
 runtimecontainer_name="${PROJECT_NAME}_fedora${FED_RELEASE}_run"
 
 
 RUNTIME_PACKAGES=(
-    rtl-sdr
+    rtl-sdr mosquitto
     )
 
 DEV_PACKAGES=(
@@ -35,7 +35,6 @@ if [ "`buildah images | grep ${basecontainer_name}`" == "" ]; then
     #cp ${basemnt}/etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-* /etc/pki/rpm-gpg/
 
     # Install packages      
-    dnf install --installroot $basemnt --release ${FED_RELEASE}  -y --setopt install_weak_deps=false --setopt='tsflags=nodocs' ${RUNTIME_PACKAGES[@]}
     IMAGE_UPDATED=true
 
 else
@@ -70,6 +69,7 @@ if [ "`buildah images | grep ${buildcontainer_name}`" == "" ]; then
     #cp ${buildmnt}/etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-* /etc/pki/rpm-gpg/
 
     # Install packages      
+    dnf install --installroot $buildmnt --release ${FED_RELEASE}  -y --setopt install_weak_deps=false --setopt='tsflags=nodocs' ${RUNTIME_PACKAGES[@]}
     dnf install --installroot $buildmnt --release ${FED_RELEASE}  -y --setopt install_weak_deps=false --setopt='tsflags=nodocs' ${DEV_PACKAGES[@]}
 else
     buildcontainer=$(buildah from --network=host --name=${buildcontainer_name} localhost/${buildcontainer_name})
@@ -83,7 +83,7 @@ else
 fi
 
 if [ $IMAGE_UPDATED == true ]; then
-    buildah config --author "Daniel Riek <riek@llnvd.io>" --label name=${PROJECT_NAME}_fedora${FED_RELEASE}_build $buildcontainer
+    buildah config --author "Daniel Riek <riek@llnvd.io>" --label name=$buildcontainer_name $buildcontainer
     buildah commit $buildcontainer $buildcontainer_name
     IMAGE_UPDATED=false
 fi
@@ -94,7 +94,7 @@ buildah run ${buildcontainer} sh -c "cd /build && cmake . && make && make instal
 
 if [ "`buildah images | grep ${runtimecontainer_name}`" == "" ]; then
     echo "Creating runtime container"
-    runtimecontainer=$(buildah from  --network=host --name=${runtimecontainer_name} localhost/$(basecontainer_name})
+    runtimecontainer=$(buildah from  --network=host --name=${runtimecontainer_name} localhost/${basecontainer_name})
     runtimemnt=$(buildah mount $runtimecontainer)
 
     # Install Freshrpms
@@ -104,19 +104,23 @@ if [ "`buildah images | grep ${runtimecontainer_name}`" == "" ]; then
     #cp ${runtimemnt}/etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-* /etc/pki/rpm-gpg/
 
     # Install packages      
+    #dnf install --installroot $runtimemnt --release ${FED_RELEASE}  -y --setopt install_weak_deps=false --setopt='tsflags=nodocs' ${RUNTIME_PACKAGES[@]}
+    dnf upgrade --installroot $runtimemnt --release ${FED_RELEASE}  -y --setopt install_weak_deps=false --setopt='tsflags=nodocs'
     dnf install --installroot $runtimemnt --release ${FED_RELEASE}  -y --setopt install_weak_deps=false --setopt='tsflags=nodocs' ${RUNTIME_PACKAGES[@]}
 
 else
     runtimecontainer=$(buildah from --network=host --name=${runtimecontainer_name} localhost/${runtimecontainer_name})
     runtimemnt=$(buildah mount $runtimecontainer)
 
-    dnf upgrade --installroot $runtimemnt --release ${FED_RELEASE}  -y --setopt install_weak_deps=false --setopt='tsflags=nodocs'
+    if [ "`dnf check-update --installroot $runtimemnt --release ${FED_RELEASE} -y`" == "100" ] ; then
+        dnf upgrade --installroot $runtimemnt --release ${FED_RELEASE}  -y --setopt install_weak_deps=false --setopt='tsflags=nodocs'
+    fi
 fi
 
 cp -pRv ${buildmnt}/usr/local/ ${runtimemnt}/usr/local/
 
 buildah config --cmd "/usr/local/bin/rtl_433" --author "Daniel Riek <riek@llnvd.io>" --label name=${runtimecontainer_name} $runtimecontainer
-
+# rtl_433 -F json -U \| mosquitto_pub -t home/rtl_433 -l
 buildah commit $runtimecontainer ${runtimecontainer_name}
 
 #cleanup
