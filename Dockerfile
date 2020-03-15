@@ -40,7 +40,7 @@ RUN rpm -ivh  https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-r
 
 ENV LANG=en_US.UTF-8
        
-ADD .
+ADD . /build
 
 RUN mkdir build_cmake && cd build_cmake \
     && cmake .. \
@@ -50,9 +50,9 @@ RUN mkdir build_cmake && cd build_cmake \
 
 FROM fedora-minimal:$FEDORA_RELEASE
 
-RUN dnf -y upgrade \
-    && dnf -y install $RPM_REQS_RUNTIME  \
-    && dnf -y clean all
+RUN microdnf -y upgrade \
+    && microdnf -y install $RPM_REQS_RUNTIME  \
+    && microdnf -y clean all
  
 COPY --from build /build/build_cmake/ /build/
 
