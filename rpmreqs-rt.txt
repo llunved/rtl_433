@@ -1,0 +1,14 @@
+automake
+bzip2
+cmake
+doxygen
+gcc
+gcc-c++
+gnupg 
+libusb-devel
+make
+openssl-devel
+rtl-sdr-devel
+tar
+xz
+

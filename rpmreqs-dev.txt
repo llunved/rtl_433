@@ -1,0 +1,5 @@
+libusb
+openssl
+pipenv
+rtl-sdr
+
