@@ -1,7 +1,9 @@
+ARG FEDORA_IMAGE_BUILD=fedora
+ARG FEDORA_IMAGE_RT=fedora-minimal
 ARG FEDORA_RELEASE=31
 ARG HTTP_PROXY=""
 
-FROM fedora:$FEDORA_RELEASE as build
+FROM $FEDORA_IMAGE_BUILD:$FEDORA_RELEASE as build
 
 WORKDIR /build
 
@@ -26,7 +28,7 @@ RUN mkdir build_cmake && cd build_cmake \
     && make install
 
 
-FROM fedora-minimal:$FEDORA_RELEASE
+FROM $FEDORA_IMAGE_RT:$FEDORA_RELEASE
 
 ADD ./rpmreqs-rt.txt /build/
 
