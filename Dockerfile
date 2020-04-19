@@ -41,6 +41,8 @@ RUN microdnf -y update \
  
 COPY --from=build /usr/local/ /usr/local/
 
+RUN mv -fv /usr/local/etc/rtl_433 /usr/local/etc/rtl_433.default
+
 ENV USER=rtl_433
 ENV CHOWN=true 
 ENV CHOWN_DIRS="/var/log/rtl_433 /etc/rtl_433 /var/lib/rtl_433"
