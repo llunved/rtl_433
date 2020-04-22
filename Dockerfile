@@ -7,6 +7,12 @@ FROM $FEDORA_IMAGE_BUILD:$FEDORA_RELEASE as build
 
 LABEL MAINTAINER riek@llunved.net
 
+ARG FEDORA_IMAGE_BUILD=fedora
+ARG FEDORA_IMAGE_RT=fedora-minimal
+ARG FEDORA_RELEASE=31
+ARG HTTP_PROXY=""
+
+
 RUN mkdir -p /build
 WORKDIR /build
 
