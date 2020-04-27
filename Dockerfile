@@ -1,57 +1,61 @@
-ARG FEDORA_IMAGE_BUILD=fedora
-ARG FEDORA_IMAGE_RT=fedora-minimal
-ARG FEDORA_RELEASE=31
-ARG HTTP_PROXY=""
+ARG OS_RELEASE=31
+ARG OS_IMG=fedora:$OS_RELEASE
 
-FROM $FEDORA_IMAGE_BUILD:$FEDORA_RELEASE as build
+FROM $OS_IMG as build
+
+ARG OS_RELEASE
+ARG OS_IMG
+ARG HTTP_PROXY=""
+ARG USER="rtl_433"
 
 LABEL MAINTAINER riek@llunved.net
+
+ENV LANG=en_US.UTF-8
 
 RUN mkdir -p /build
 WORKDIR /build
 
+RUN rpm -ivh  https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$OS_RELEASE.noarch.rpm \
+    && rpm -ivh  https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$OS_RELEASE.noarch.rpm \
+    && dnf -y upgrade 
+
 ADD ./rpmreqs-rt.txt ./rpmreqs-dev.txt /build/
+RUN dnf -y install $(cat rpmreqs-rt.txt) $(cat rpmreqs-dev.txt) 
 
-RUN rpm -ivh  https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$FEDORA_RELEASE.noarch.rpm \
-    && dnf -y upgrade \
-    && dnf -y install $(cat /build/rpmreqs-rt.txt) $(cat /build/rpmreqs-dev.txt) \
-    && dnf -y clean all
+# Create the minimal target environment
+RUN mkdir /sysimg \
+    && dnf install --installroot /sysimg --releasever $OS_RELEASE --setopt install_weak_deps=false --nodocs -y coreutils-single glibc-minimal-langpack $(cat rpmreqs-rt.txt) \
+    && rm -rf /sysimg/var/cache/* \
+    && ls -alh /sysimg/var/cache
 
-ENV LANG=en_US.UTF-8
-       
-# Doing this here and only rpmreqs above should reduce the amount of building?
+RUN adduser -R /sysimg -u 1010 -r -g root -G video -d /var/lib/rtl_433 -s /sbin/nologin -c "rtl_433 user" $USER 
+
+# Doing this here and only rpmreqs above should reduce the amount of building? 
+# FIXME - should be more selective
 ADD . /build
 
 RUN mkdir build_cmake && cd build_cmake \
-    && cmake .. \
+    && cmake -DCMAKE_INSTALL_PREFIX:PATH=/sysimg .. \
     && make \
     && make install
 
 
-FROM $FEDORA_IMAGE_RT:$FEDORA_RELEASE
+FROM scratch AS runtime
 
 LABEL MAINTAINER riek@llunved.net
 
-ADD ./rpmreqs-rt.txt /build/
+ENV LANG=en_US.UTF-8
+ENV USER=$USER
 
-RUN microdnf -y update \
-    && microdnf -y install $(cat /build/rpmreqs-rt.txt) \
-    && microdnf -y clean all \
-    && rm -fv rpmreqs-rt.txt
- 
-COPY --from=build /usr/local/ /usr/local/
+COPY --from=build /sysimg /
 
-RUN mv -fv /usr/local/etc/rtl_433 /usr/local/etc/rtl_433.default
+RUN mv -fv /etc/rtl_433 /etc/rtl_433.default
 
-ENV USER=rtl_433
 ENV CHOWN=true 
 ENV CHOWN_DIRS="/var/log/rtl_433 /etc/rtl_433 /var/lib/rtl_433"
-
 RUN for CUR_DIR in ${CHOWN_DIRS}; do mkdir -p $CUR_DIR; done
+RUN if [ ! -z "$DEVBUILD" ] ; then chown -R 1010:0 /var/lib/rtl_433 ; fi
   
-RUN adduser -u 1010 -r -g root -G video -d /var/lib/rtl_433 -s /sbin/nologin -c "rtl_433 user" ${USER} \
-    && if [ ! -z "$DEVBUILD" ] ; then chown -R ${USER}:root /var/lib/rtl_433 ; fi
-
 ADD ./entrypoint.sh /sbin/ 
 ADD ./install.sh /sbin/ 
 ADD ./uninstall.sh /sbin/ 

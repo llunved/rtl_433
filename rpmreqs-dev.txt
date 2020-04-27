@@ -9,6 +9,7 @@ libusb-devel
 make
 openssl-devel
 rtl-sdr-devel
+shadow-utils
 tar
 xz
 
