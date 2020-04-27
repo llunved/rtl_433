@@ -2,13 +2,20 @@
 
 set +x
 
-FEDORA_RELEASE=${FEDORA_RELEASE:-$(grep VERSION_ID /etc/os-release | cut -d '=' -f 2)}
-FEDORA_IMAGE_RT=${FEDORA_IMAGE_BUILD:-"registry.fedoraproject.org/fedora"}
-FEDORA_IMAGE_RT=${FEDORA_IMAGE_RT:-"registry.fedoraproject.org/fedora-minimal"}
+OS_RELEASE=${OS_RELEASE:-$(grep VERSION_ID /etc/os-release | cut -d '=' -f 2)}
+OS_IMG=${OS_IMG:-"registry.fedoraproject.org/fedora:${OS_RELEASE}"}
+HTTP_PROXY=${HTTP_PROXY:-""}
 BUILD_ID=${BUILD_ID:-`date +%s`}
+BUILD_ARCH=$(uname -m)
+PUSHREG=${PUSHREG:-""}
 
-echo sudo podman build --build-arg FEDORA_RELEASE=${FEDORA_RELEASE} --build-arg FEDORA_IMAGE_BUILD=${FEDORA_IMAGE_BUILD} --build-arg FEDORA_IMAGE_RT=${FEDORA_IMAGE_RT} -t llunved/zwave2mqtt:${BUILD_ID} -f Dockerfile.Fedora
-sudo podman build --build-arg FEDORA_RELEASE=${FEDORA_RELEASE} --build-arg FEDORA_IMAGE_RT=${FEDORA_IMAGE_RT} -t llunved/zwave2mqtt:${BUILD_ID} -f Dockerfile.Fedora
-echo sudo  podman tag llunved/zwave2mqtt:${BUILD_ID} llunved/zwave2mqtt:latest
-sudo podman tag llunved/zwave2mqtt:${BUILD_ID} llunved/zwave2mqtt:latest
+echo sudo podman build --build-arg OS_RELEASE=${OS_RELEASE} --build-arg OS_IMG=${OS_IMG} -t ${BUILD_ARCH}/rtl_433:${BUILD_ID} -f Dockerfile
+sudo podman build --build-arg OS_RELEASE=${OS_RELEASE} --build-arg OS_IMG=${OS_IMG} -t ${BUILD_ARCH}/rtl_433:${BUILD_ID} -f Dockerfile
 
+echo sudo  podman tag ${BUILD_ARCH}/rtl_433:${BUILD_ID} ${BUILD_ARCH}/rtl_433:latest
+sudo  podman tag ${BUILD_ARCH}/rtl_433:${BUILD_ID} ${BUILD_ARCH}/rtl_433:latest
+
+if [ ! -z "${PUSHREG}" ]; then
+    echo sudo podman tag ${BUILD_ARCH}/rtl_433:${BUILD_ID} ${PUSHREG}/${BUILD_ARCH}/rtl_433:${BUILD_ID}
+    echo sudo podman tag ${BUILD_ARCH}/rtl_433:${BUILD_ID} ${PUSHREG}/${BUILD_ARCH}/rtl_433:latest
+fi
