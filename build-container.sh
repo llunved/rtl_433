@@ -17,5 +17,7 @@ sudo  podman tag ${BUILD_ARCH}/rtl_433:${BUILD_ID} ${BUILD_ARCH}/rtl_433:latest
 
 if [ ! -z "${PUSHREG}" ]; then
     echo sudo podman tag ${BUILD_ARCH}/rtl_433:${BUILD_ID} ${PUSHREG}/${BUILD_ARCH}/rtl_433:${BUILD_ID}
-    echo sudo podman tag ${BUILD_ARCH}/rtl_433:${BUILD_ID} ${PUSHREG}/${BUILD_ARCH}/rtl_433:latest
+    echo sudo podman push ${PUSHREG}/${BUILD_ARCH}/rtl_433:${BUILD_ID}
+    echo sudo podman tag ${BUILD_ARCH}/rtl_433:${BUILD_ID} ${PUSHREG}/${BUILD_ARCH}/rtl_433:${BUILD_ID}
+    echo sudo podman push ${PUSHREG}/${BUILD_ARCH}/rtl_433:latest
 fi
