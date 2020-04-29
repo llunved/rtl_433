@@ -1,4 +1,4 @@
-ARG OS_RELEASE=31
+ARG OS_RELEASE=32
 ARG OS_IMG=fedora:$OS_RELEASE
 
 FROM $OS_IMG as build
@@ -17,6 +17,8 @@ WORKDIR /build
 
 RUN rpm -ivh  https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$OS_RELEASE.noarch.rpm \
     && rpm -ivh  https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$OS_RELEASE.noarch.rpm \
+    && dnf install -y dnf-plugins-core \
+    && dnf copr enable -y llunved/rtl-sdr-nozc \
     && dnf -y upgrade 
 
 ADD ./rpmreqs-rt.txt ./rpmreqs-dev.txt /build/
@@ -24,6 +26,7 @@ RUN dnf -y install $(cat rpmreqs-rt.txt) $(cat rpmreqs-dev.txt)
 
 # Create the minimal target environment
 RUN mkdir /sysimg \
+    && dnf copr -y --installroot /sysimg enable llunved/rtl-sdr-nozc \
     && dnf install --installroot /sysimg --releasever $OS_RELEASE --setopt install_weak_deps=false --nodocs -y coreutils-single glibc-minimal-langpack $(cat rpmreqs-rt.txt) \
     && rm -rf /sysimg/var/cache/* \
     && ls -alh /sysimg/var/cache
