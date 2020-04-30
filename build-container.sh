@@ -21,8 +21,8 @@ if [ $? -eq 0 ]; then
     sudo podman tag ${BUILD_ARCH}/rtl_433:${BUILD_ID} ${PUSHREG}/${BUILD_ARCH}/rtl_433:${BUILD_ID}
     echo sudo podman push ${PUSHREG}/${BUILD_ARCH}/rtl_433:${BUILD_ID}
     sudo podman push ${PUSHREG}/${BUILD_ARCH}/rtl_433:${BUILD_ID}
-    echo sudo podman tag ${BUILD_ARCH}/rtl_433:${BUILD_ID} ${PUSHREG}/${BUILD_ARCH}/rtl_433:${BUILD_ID}
-    sudo podman tag ${BUILD_ARCH}/rtl_433:${BUILD_ID} ${PUSHREG}/${BUILD_ARCH}/rtl_433:${BUILD_ID}
+    echo sudo podman tag ${BUILD_ARCH}/rtl_433:${BUILD_ID} ${PUSHREG}/${BUILD_ARCH}/rtl_433:latest
+    sudo podman tag ${BUILD_ARCH}/rtl_433:${BUILD_ID} ${PUSHREG}/${BUILD_ARCH}/rtl_433:latest
     echo sudo podman push ${PUSHREG}/${BUILD_ARCH}/rtl_433:latest
     sudo podman push ${PUSHREG}/${BUILD_ARCH}/rtl_433:latest
   fi
