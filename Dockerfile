@@ -72,8 +72,8 @@ EXPOSE 8091
 ENTRYPOINT ["/sbin/entrypoint.sh"]
 CMD ["/bin/start.sh"]
 
-LABEL RUN="podman run --rm -t -i --name \$NAME -p 8091:8091 --net=host --device /dev/ttyACM0 --entrypoint /sbin/entrypoint.sh -v /var/lib/rtl_433/rtl_433:/rtl_433/store -v /var/lib/rtl_433/openzwave:/etc/openzwave -v /var/log/rtl_433:/var/log/rtl_433 \$IMAGE /bin/start.sh"
-LABEL INSTALL="podman run --rm -t -i --privileged --rm --net=host --ipc=host --pid=host -v /:/host -v /run:/run -e HOST=/host -e IMAGE=\$IMAGE -e NAME=\$NAME -e LOGDIR=/var/log -e DATADIR=/var/lib --entrypoint /bin/sh  \$IMAGE /sbin/install.sh"
-LABEL UNINSTALL="podman run --rm -t -i --privileged --rm --net=host --ipc=host --pid=host -v /:/host -v /run:/run -e HOST=/host -e IMAGE=\$IMAGE -e NAME=\$NAME -e LOGDIR=/var/log -e DATADIR=/var/lib --entrypoint /bin/sh  \$IMAGE /sbin/uninstall.sh"
+LABEL RUN="podman run --rm -t -i --name \$NAME --privileged --net=host --device /dev/dvb:/dev/dvb:rw --entrypoint /sbin/entrypoint.sh -v /etc/rtl_433:/etc/etl_433:rwZ -v /var/lib/rtl_433/rtl_433:/var/lib/rtl_433:rwZ -v /var/log/rtl_433:/var/log/rtl_433:rwZ \$IMAGE /bin/start.sh"
+LABEL INSTALL="podman run --rm -t -i --privileged --rm --net=host --ipc=host --pid=host -v /:/host -v /run:/run -e HOST=/host -e IMAGE=\$IMAGE -e NAME=\$NAME -e CONFDIR=/etc -e LOGDIR=/var/log -e DATADIR=/var/lib --entrypoint /bin/sh  \$IMAGE /sbin/install.sh"
+LABEL UNINSTALL="podman run --rm -t -i --privileged --rm --net=host --ipc=host --pid=host -v /:/host -v /run:/run -e HOST=/host -e IMAGE=\$IMAGE -e NAME=\$NAME -e CONFDIR=/etc -e LOGDIR=/var/log -e DATADIR=/var/lib --entrypoint /bin/sh  \$IMAGE /sbin/uninstall.sh"
 
 
