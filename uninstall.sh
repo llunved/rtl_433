@@ -15,7 +15,8 @@ fi
 
 # Remove the container and unit file
 
-chroot /host systemctl stop ${NAME}
-chroot /host rm -fv /etc/systemd/system/dockerregistry.service
+chroot /host /usr/bin/systemctl stop ${NAME}
+chroot /host /usr/bin/systemctl disable ${NAME}
+chroot /host rm -fv /etc/systemd/system/${NAME}.service
 chroot /host /usr/bin/podman rm ${NAME}
 
