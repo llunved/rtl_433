@@ -15,9 +15,15 @@ sudo podman build --build-arg OS_RELEASE=${OS_RELEASE} --build-arg OS_IMG=${OS_I
 echo sudo  podman tag ${BUILD_ARCH}/rtl_433:${BUILD_ID} ${BUILD_ARCH}/rtl_433:latest
 sudo  podman tag ${BUILD_ARCH}/rtl_433:${BUILD_ID} ${BUILD_ARCH}/rtl_433:latest
 
-if [ ! -z "${PUSHREG}" ]; then
+if [ $? -eq 0 ]; then
+  if [ ! -z "${PUSHREG}" ]; then
     echo sudo podman tag ${BUILD_ARCH}/rtl_433:${BUILD_ID} ${PUSHREG}/${BUILD_ARCH}/rtl_433:${BUILD_ID}
+    sudo podman tag ${BUILD_ARCH}/rtl_433:${BUILD_ID} ${PUSHREG}/${BUILD_ARCH}/rtl_433:${BUILD_ID}
     echo sudo podman push ${PUSHREG}/${BUILD_ARCH}/rtl_433:${BUILD_ID}
+    sudo podman push ${PUSHREG}/${BUILD_ARCH}/rtl_433:${BUILD_ID}
     echo sudo podman tag ${BUILD_ARCH}/rtl_433:${BUILD_ID} ${PUSHREG}/${BUILD_ARCH}/rtl_433:${BUILD_ID}
+    sudo podman tag ${BUILD_ARCH}/rtl_433:${BUILD_ID} ${PUSHREG}/${BUILD_ARCH}/rtl_433:${BUILD_ID}
     echo sudo podman push ${PUSHREG}/${BUILD_ARCH}/rtl_433:latest
+    sudo podman push ${PUSHREG}/${BUILD_ARCH}/rtl_433:latest
+  fi
 fi
