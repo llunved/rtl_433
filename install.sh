@@ -18,7 +18,7 @@ for CUR_DIR in /host/${LOGDIR}/${NAME} /host/${DATADIR}/${NAME} /host/${CONFDIR}
     if [ -n $CUR_DIR ]; then
         mkdir -p $CUR_DIR
 	if [ "$CUR_DIR" == "/host/${CONFDIR}/${NAME}" ] ; then
-	    cp -Rv /etc/rtl_433.default /host/${CONFDIR}/${NAME}
+	    cp -Rv /etc/rtl_433.default/ /host/${CONFDIR}/${NAME}/
 	fi
         chmod -R 775 $CUR_DIR
 	chgrp -R 0 $CUR_DIR
@@ -26,6 +26,6 @@ for CUR_DIR in /host/${LOGDIR}/${NAME} /host/${DATADIR}/${NAME} /host/${CONFDIR}
 done    
 
 
-chroot /host /usr/bin/podman create --name ${NAME} --net=host --device /dev/dvb:rwZ --entrypoint /sbin/entrypoint.sh -v ${DATADIR}/${NAME}:/var/lib/rtl_433:rwZ -v ${CONFDIR}/${NAME}:/etc/rtl_433:rwZ -v ${LOGDIR}/${NAME}:/var/log/rtl_433:rwZ ${IMAGE} /bin/start.sh
-chroot /host sh -c "/usr/bin/podman generate systemd --restart-policy=always -t 1 ${NAME} > /etc/systemd/system/zwave2mqtt.service"
+chroot /host /usr/bin/podman create --name ${NAME} --net=host --device /dev/dvb:rw --entrypoint /sbin/entrypoint.sh -v ${DATADIR}/${NAME}:/var/lib/rtl_433:rw -v ${CONFDIR}/${NAME}:/etc/rtl_433:rw -v ${LOGDIR}/${NAME}:/var/log/rtl_433:rw ${IMAGE} /bin/start.sh
+chroot /host sh -c "/usr/bin/podman generate systemd --restart-policy=always -t 1 ${NAME} > /etc/systemd/system/rtl_433.service"
 
