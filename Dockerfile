@@ -59,14 +59,16 @@ ENV CHOWN_DIRS="/var/log/rtl_433 /etc/rtl_433 /var/lib/rtl_433"
 RUN for CUR_DIR in ${CHOWN_DIRS}; do mkdir -p $CUR_DIR; done
 RUN if [ ! -z "$DEVBUILD" ] ; then chown -R 1010:0 /var/lib/rtl_433 ; fi
   
-ADD ./entrypoint.sh /sbin/ 
-ADD ./install.sh /sbin/ 
-ADD ./uninstall.sh /sbin/ 
-ADD ./start.sh /bin/ 
-RUN chmod +x /sbin/entrypoint.sh 
-RUN chmod +x /sbin/install.sh 
-RUN chmod +x /sbin/uninstall.sh 
-RUN chmod +x /bin/start.sh
+ADD ./entrypoint.sh \
+    ./install.sh \
+    ./upgrade.sh \
+    ./uninstall.sh \
+    ./start.sh /bin/ 
+RUN chmod +x /sbin/entrypoint.sh \
+     && chmod +x /sbin/install.sh \
+     && chmod +x /sbin/upgrade.sh \
+     && chmod +x /sbin/uninstall.sh \
+     && chmod +x /bin/start.sh
 
 EXPOSE 8091
 ENTRYPOINT ["/sbin/entrypoint.sh"]
@@ -74,6 +76,7 @@ CMD ["/bin/start.sh"]
 
 LABEL RUN="podman run --rm -t -i --name \$NAME --privileged --net=host --device /dev/dvb:/dev/dvb:rw --entrypoint /sbin/entrypoint.sh -v /etc/rtl_433:/etc/etl_433:rwZ -v /var/lib/rtl_433/rtl_433:/var/lib/rtl_433:rwZ -v /var/log/rtl_433:/var/log/rtl_433:rwZ \$IMAGE /bin/start.sh"
 LABEL INSTALL="podman run --rm -t -i --privileged --rm --net=host --ipc=host --pid=host -v /:/host -v /run:/run -e HOST=/host -e IMAGE=\$IMAGE -e NAME=\$NAME -e CONFDIR=/etc -e LOGDIR=/var/log -e DATADIR=/var/lib --entrypoint /bin/sh  \$IMAGE /sbin/install.sh"
+LABEL UPGRADE="podman run --rm -t -i --privileged --rm --net=host --ipc=host --pid=host -v /:/host -v /run:/run -e HOST=/host -e IMAGE=\$IMAGE -e NAME=\$NAME -e CONFDIR=/etc -e LOGDIR=/var/log -e DATADIR=/var/lib --entrypoint /bin/sh  \$IMAGE /sbin/upgrade.sh"
 LABEL UNINSTALL="podman run --rm -t -i --privileged --rm --net=host --ipc=host --pid=host -v /:/host -v /run:/run -e HOST=/host -e IMAGE=\$IMAGE -e NAME=\$NAME -e CONFDIR=/etc -e LOGDIR=/var/log -e DATADIR=/var/lib --entrypoint /bin/sh  \$IMAGE /sbin/uninstall.sh"
 
 
