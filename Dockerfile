@@ -62,8 +62,10 @@ RUN if [ ! -z "$DEVBUILD" ] ; then chown -R 1010:0 /var/lib/rtl_433 ; fi
 ADD ./entrypoint.sh \
     ./install.sh \
     ./upgrade.sh \
-    ./uninstall.sh \
-    ./start.sh /bin/ 
+    ./uninstall.sh  /sbin
+
+ADD ./start.sh  /bin/ 
+
 RUN chmod +x /sbin/entrypoint.sh \
      && chmod +x /sbin/install.sh \
      && chmod +x /sbin/upgrade.sh \
