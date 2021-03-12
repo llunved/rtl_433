@@ -9,8 +9,8 @@ BUILD_ID=${BUILD_ID:-`date +%s`}
 BUILD_ARCH=$(uname -m)
 PUSHREG=${PUSHREG:-""}
 
-echo sudo podman build --build-arg OS_RELEASE=${OS_RELEASE} --build-arg OS_IMG=${OS_IMG} -t ${BUILD_ARCH}/rtl_433:${BUILD_ID} -f Dockerfile
-sudo podman build --build-arg OS_RELEASE=${OS_RELEASE} --build-arg OS_IMG=${OS_IMG} -t ${BUILD_ARCH}/rtl_433:${BUILD_ID} -f Dockerfile
+echo sudo podman build --build-arg OS_RELEASE=${OS_RELEASE} --build-arg OS_IMG=${OS_IMG} -t ${BUILD_ARCH}/rtl_433:${BUILD_ID} -f Containerfile
+sudo podman build --build-arg OS_RELEASE=${OS_RELEASE} --build-arg OS_IMG=${OS_IMG} -t ${BUILD_ARCH}/rtl_433:${BUILD_ID} -f Containerfile
 
 echo sudo  podman tag ${BUILD_ARCH}/rtl_433:${BUILD_ID} ${BUILD_ARCH}/rtl_433:latest
 sudo  podman tag ${BUILD_ARCH}/rtl_433:${BUILD_ID} ${BUILD_ARCH}/rtl_433:latest

@@ -18,7 +18,7 @@ WORKDIR /build
 RUN rpm -ivh  https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$OS_RELEASE.noarch.rpm \
     && rpm -ivh  https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$OS_RELEASE.noarch.rpm \
     && dnf install -y dnf-plugins-core \
-    && dnf copr enable -y llunved/rtl-sdr-nozc \
+#    && dnf copr enable -y llunved/rtl-sdr-nozc \
     && dnf -y upgrade 
 
 ADD ./rpmreqs-rt.txt ./rpmreqs-dev.txt /build/
@@ -42,6 +42,8 @@ RUN mkdir build_cmake && cd build_cmake \
     && make \
     && make install
 
+RUN mkdir -p /sysimg/usr/share/doc/rtl_433/config/etc
+RUN mv -fv /sysimg/etc/rtl_433 /sysimg/usr/share/doc/rtl_433/config/etc/rtl_433
 
 FROM scratch AS runtime
 
@@ -52,7 +54,6 @@ ENV USER=$USER
 
 COPY --from=build /sysimg /
 
-RUN mv -fv /etc/rtl_433 /etc/rtl_433.default
 
 ENV CHOWN=true 
 ENV CHOWN_DIRS="/var/log/rtl_433 /etc/rtl_433 /var/lib/rtl_433"

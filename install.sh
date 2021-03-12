@@ -18,7 +18,7 @@ for CUR_DIR in /host/${LOGDIR}/${NAME} /host/${DATADIR}/${NAME} /host/${CONFDIR}
     if [ ! -d $CUR_DIR ]; then
         mkdir -p $CUR_DIR
 	if [ "$CUR_DIR" == "/host/${CONFDIR}/${NAME}" ] ; then
-	    cp -Rv /etc/rtl_433.default/* /host/${CONFDIR}/${NAME}/
+	    cp -Rv /usr/share/doc/rtl_433/config/etc/rtl_433/* /host/${CONFDIR}/${NAME}/
 	fi
         chmod -R 775 $CUR_DIR
 	chgrp -R 0 $CUR_DIR
@@ -26,6 +26,6 @@ for CUR_DIR in /host/${LOGDIR}/${NAME} /host/${DATADIR}/${NAME} /host/${CONFDIR}
 done    
 
 
-chroot /host /usr/bin/podman create --name ${NAME} --privileged --net=host --device /dev/dvb:rw --entrypoint /sbin/entrypoint.sh -v ${DATADIR}/${NAME}:/var/lib/rtl_433:rw -v ${CONFDIR}/${NAME}:/etc/rtl_433:rw -v ${LOGDIR}/${NAME}:/var/log/rtl_433:rw ${IMAGE} /bin/start.sh
+chroot /host /usr/bin/podman create --name ${NAME} --privileged --net=host --device /dev/dvb:rw --entrypoint /sbin/entrypoint.sh -v ${DATADIR}/${NAME}:/var/lib/rtl_433:rw,Z -v ${CONFDIR}/${NAME}:/etc/rtl_433:rw,Z -v ${LOGDIR}/${NAME}:/var/log/rtl_433:rw,Z ${IMAGE} /bin/start.sh
 chroot /host sh -c "/usr/bin/podman generate systemd --restart-policy=always -t 1 ${NAME} > /etc/systemd/system/${NAME}.service && systemctl daemon-reload"
 
