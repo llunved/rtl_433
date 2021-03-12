@@ -1,0 +1,4 @@
+libusb
+openssl
+rtl-sdr
+
